@@ -1,32 +1,47 @@
 from tkinter import *
-
-# Colors
-lightred = '#ffa0a0'
-lightblue = '#7cfcff'
-lightgreen = '#c5ffa0'
-lightpink = '#ffc5dc'
-lightpurple = '#e5c7ff'
-
+from colors import *
 
 class CircleBeat:
-    def __init__(self, master):
-        self.master = master
+    def __init__(self):
+        self.master = Tk()
+        self.master.title('CircleBeat')
+        self.master.configure(bg='gray')
+        self.master.resizable(width=False, height=False)
+
+        self.topFrame = None
+        self.boardFrame = None
+
         self.gb = None
-        self.colors = [lightred, lightblue, lightgreen, lightpink, lightpurple]
         self.width = None
         self.height = None
         self.winc = 0.08
-        self.hinc = 0.23
+        self.hinc = 0.05
+
+        self.colors = Colors().getColors()
         self.centers = []
 
-    def createCanvas(self, width: int, height: int):
-        self.width = width
-        self.height = height
-        self.gb = Canvas(master=self.master, width=self.width, height=self.height, bg='gray', cursor='dot')
-        self.gb.pack()
-        self.gb.bind('<Button-1>', self.onClick)
+    def createFrames(self):
+        # Creates two frames to divide the top from the board containing circles
+        self.topFrame = Frame(master=self.master, bg='red')
+        # topFrame = Frame(master=self.master, bg='red', bd=10, relief='sunken')
+        #topFrame.grid(row=0, column=0, padx=5, pady=5)
+        self.topFrame.grid(row=0, column=0)
 
-    def draw(self):
+        self.boardFrame = Frame(master=self.master, bg='blue')
+        self.boardFrame.grid(row=1, column=0, padx=5, pady=5)
+
+
+        testLabel = Label(master=self.topFrame, text="This is a test")
+        testLabel.grid(row=0, column=0, pady=20, sticky=W + S)
+        testLabel.configure(bg='purple')
+
+    def createCanvas(self):
+        # Creates a canvas of size width x height and disables resizing of the window
+        self.gb = Canvas(master=self.boardFrame, width=self.width, height=self.height, bg='gray', cursor='dot')
+        self.gb.pack()
+        #self.gb.bind('<Button-1>', self.onClick)
+
+    def createCircles(self):
         if self.width is None or self.height is None:
             print("Width and height not set.\n")
         else:
@@ -47,10 +62,41 @@ class CircleBeat:
                     self.hinc += 0.156
                     self.winc = 0.08
 
+
+
+    def initialize(self, width: int, height: int):
+        # Initiates the creation of the canvas and frames
+        # and draws the circles
+        try:
+            self.width = width
+            self.height = height
+
+            if self.width is None or self.width <= 0:
+                raise WidthError
+            if self.height is None or self.height <= 0:
+                raise HeightError
+
+
+            self.createFrames()
+            self.createCanvas()
+            self.createCircles()
+
+        except (WidthError, HeightError) as e:
+            print('Invalid {}'.format('Width' if e == WidthError else 'Height'))
+            exit(0)
+
+    def start(self):
+        self.master.mainloop()
+
     def onClick(self, event):
         print('You clicked on {} and {}'.format(event.x, event.y))
 
-
-
     def update(self):
         pass
+
+
+class WidthError(Exception):
+    pass
+
+class HeightError(Exception):
+    pass
